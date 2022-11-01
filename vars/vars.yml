@@ -1,0 +1,4 @@
+---
+nginx_logs: /var/log/nginx/*
+audit_log: /var/log/audit/audit.log
+logstash_host: 192.168.56.24:5044

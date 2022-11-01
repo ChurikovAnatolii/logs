@@ -1,0 +1,13 @@
+filebeat.inputs:
+- type: filestream
+  id: nginx-id
+  paths:
+    - /var/log/nginx/*.log
+
+- type: filestream
+  id: nginx-config
+  paths:
+    - /etc/nginx/*.conf
+    
+output.logstash:
+  hosts: ["192.168.56.24:5044"]
