@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = 'almalinux/8'
   config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "nginx.yml"
+    ansible.playbook = "ELK_NGINX.yml"
   end
 
 config.vm.define "LOG" do |log|
@@ -15,7 +15,7 @@ config.vm.define "LOG" do |log|
 
 
   log.vm.provider "virtualbox" do |vb|
-    vb.memory = "2048"
+    vb.memory = "4096"
   end
   log.vm.host_name = 'LOG'
   
@@ -31,7 +31,7 @@ config.vm.define "LOG" do |log|
     web.vm.network "private_network", ip: "192.168.56.25"
     web.vm.host_name = 'WEB'
     web.vm.provider :virtualbox do |vb|
-      vb.memory = "1024"
+      vb.memory = "4096"
     end
     
   end

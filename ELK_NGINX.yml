@@ -1,4 +1,4 @@
-- name: NGINX | Install and configure NGINX and Filebeat
+- name: NGINX | Install and configure NGINX, filebeat, logstash
   hosts: WEB
   become: true
   vars_files: 
@@ -55,6 +55,48 @@
        name: filebeat
        enabled: yes
 
+    - name: Install Logstash
+      yum:
+        name: logstash
+        state: latest
+      notify:
+        - restart logstash
+
+    - name: enable service Logstash
+      systemd:
+       name: logstash
+       enabled: yes
+
+    - name: config Logstash
+      template:
+         src: "templates/10-pipeline.conf.j2"
+         dest: "/etc/logstash/conf.d/10-pipeline.conf"
+         owner: root
+         group: root
+         mode: 0644
+      notify: restart logstash
+
+    - name: Install Auditbeat
+      yum:
+        name: auditbeat
+        state: latest
+      notify:
+        - restart auditbeat
+
+    - name: enable service auditbeat
+      systemd:
+       name: auditbeat
+       enabled: yes
+
+    - name: config auditbeat
+      template:
+         src: "templates/auditbeat.yml.j2"
+         dest: "/etc/auditbeat/auditbeat.yml"
+         owner: root
+         group: root
+         mode: 0644
+      notify: restart auditbeat
+
   handlers:
     - name: restart nginx
       systemd:
@@ -62,19 +104,25 @@
         state: restarted
         enabled: yes
     
-    - name: reload nginx
-      systemd:
-        name: nginx
-        state: reloaded
-    
     - name: restart filebeat
       systemd:
         name: filebeat
         state: restarted
         enabled: yes
+    
+    - name: restart logstash
+      systemd:
+        name: logstash
+        state: restarted
+        enabled: yes
+    
+    - name: restart auditbeat
+      systemd:
+        name: auditbeat
+        state: restarted
+        enabled: yes
 
-
-- name: Logstash, Elasticsearch and Kibana Install
+- name: Elasticsearch and Kibana Install
   hosts: LOG
   become: true
   vars_files: 
@@ -102,38 +150,47 @@
       systemd:
        name: elasticsearch
        enabled: yes
-      
-    - name: Install Logstash
-      yum:
-        name: logstash
-        state: latest
-      notify:
-        - restart logstash
 
-    - name: enable service Logstash
-      systemd:
-       name: logstash
-       enabled: yes
-
-    - name: config Logstash
+    - name: elasticsearch config
       template:
-         src: "templates/10-pipline.conf.j2"
-         dest: "/etc/logstash/conf.d/10-pipeline.conf"
+         src: "templates/elasticsearch.yml.j2"
+         dest: "/etc/elasticsearch/elasticsearch.yml"
          owner: root
          group: root
          mode: 0644
-      notify: restart logstash
-         
-  handlers:
-    - name: restart logstash
-      systemd:
-        name: logstash
-        state: restarted
-        enabled: yes
+      notify: restart elasticsearch
+      tags: elasticsearch_config
 
+    - name: Install Kibana
+      yum:
+        name: kibana
+        state: latest
+
+    - name: enable service Kibana
+      systemd:
+       name: kibana
+       enabled: yes
+
+    - name: kibana config
+      template:
+         src: "templates/kibana.yml.j2"
+         dest: "/etc/kibana/kibana.yml"
+         owner: root
+         group: root
+         mode: 0644
+      notify: restart kibana
+      tags: kibana_config
+       
+  handlers:
     - name: restart elasticsearch
       systemd:
         name: elasticsearch
+        state: restarted
+        enabled: yes
+
+    - name: restart kibana
+      systemd:
+        name: kibana
         state: restarted
         enabled: yes
     

@@ -1,0 +1,40 @@
+auditbeat.modules:
+
+- module: auditd
+  audit_rule_files: [ '${path.config}/audit.rules.d/*.conf' ]
+  audit_rules: |
+
+- module: file_integrity
+  paths:
+  - /etc/nginx
+
+- module: system
+  datasets:
+    - host    
+    - login   
+    - process 
+    - socket  
+    - user 
+  state.period: 5m
+
+  user.detect_password_changes: true
+
+  login.wtmp_file_pattern: /var/log/wtmp*
+  login.btmp_file_pattern: /var/log/btmp*
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.dashboards.enabled: true
+
+setup.kibana:
+
+  host: "192.168.56.24:5601"
+
+output.elasticsearch:
+  hosts: ["192.168.56.24:9200"]
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
