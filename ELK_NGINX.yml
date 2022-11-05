@@ -144,7 +144,7 @@
         name: elasticsearch
         state: latest
       notify:
-        - restart elasticsearch
+        - start elasticsearch
 
     - name: enable service elasticsearch
       systemd:
@@ -158,7 +158,7 @@
          owner: root
          group: root
          mode: 0644
-      notify: restart elasticsearch
+      notify: start elasticsearch
       tags: elasticsearch_config
 
     - name: Install Kibana
@@ -182,10 +182,10 @@
       tags: kibana_config
        
   handlers:
-    - name: restart elasticsearch
+    - name: start elasticsearch
       systemd:
         name: elasticsearch
-        state: restarted
+        state: started
         enabled: yes
 
     - name: restart kibana
@@ -193,5 +193,3 @@
         name: kibana
         state: restarted
         enabled: yes
-    
-  
